@@ -1,4 +1,4 @@
-#include "stm32f10x.h"
+#include "stm32f4xx.h"
 #include "Init.h"
 #include "math.h"
 extern uint8_t  BuffRxUsart1[SIZE_BUFF_DMA_UART1_RX];
