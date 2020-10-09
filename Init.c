@@ -36,6 +36,7 @@ void Init()
   GPIO_InitStructre.GPIO_Mode = GPIO_Mode_IN; 
   GPIO_InitStructre.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOA, &GPIO_InitStructre);
+  //GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
   
   GPIO_InitStructre.GPIO_Pin = GPIO_Pin_9;//TX
   GPIO_InitStructre.GPIO_Mode = GPIO_Mode_AF; 

@@ -11,7 +11,7 @@ extern int8_t rslt;
 char  BuffTxUsart1[SIZE_BUFF_DMA_UART1_TX];
 char  BuffRxUsart1[SIZE_BUFF_DMA_UART1_RX];
 
-
+int GetMesPC(uint8_t *buff);
 
 /*-----------------------Отправка пакета по usart1 на комп-----------------*/
 void SendMesPC()
@@ -81,21 +81,10 @@ int GetMesPC(uint8_t *buff)
    SIZE_BUFF_DMA_UART1_RX//Size;
   };
   static UartStreamTypeDef UART_RX={StopUART,0,0,0};
-  static float Kp_tm_float;
-  static float Ki_tm_float;
-  static float Kd_tm_float;
-  static uint32_t *Kp_tm  = ((uint32_t*)&Kp_tm_float);
-  static uint32_t *Ki_tm  = ((uint32_t*)&Ki_tm_float);
-  static uint32_t *Kd_tm  = ((uint32_t*)&Kd_tm_float);
   uint8_t ch;
   
    uint32_t p_cndtr_tm;
    uint32_t size_recieve_bytes;
-// Buff_USART1_RX.p_rd = BuffRxUsart1;
-// Buff_USART1_RX.p_wr = BuffRxUsart1;
-// Buff_USART1_RX.p_cndtr = &DMA2_Stream2->NDTR;
-// Buff_USART1_RX.StartAdr = (char*)DMA2_Stream2->M0AR;
-// Buff_USART1_RX.Size = SIZE_BUFF_DMA_UART1_RX;
   
   
   p_cndtr_tm = *Buff_USART1_RX.p_cndtr;
@@ -129,9 +118,6 @@ else
                             UART_RX.Mode = WorkUART;
                             UART_RX.ByteCounter = 0;
                             UART_RX.Flag_Simb_0x10 = 0;
-                            Kp_tm_float=0;
-                            Ki_tm_float=0;
-                            Kd_tm_float=0;
                     }
                     break;
               case WorkUART:
@@ -153,38 +139,7 @@ else
                             UART_RX.Flag_Simb_0x10 = 0;
                             *buff = ch;
                              buff++;
-//                             if (UART_RX.ByteCounter == 0)
-//                               {
-//                                  if ( ch > 100)		
-//                                          PRM.GasValue = 100;  
-//                                  else
-//                                          PRM.GasValue = ch;
-//                                 
-//                                  UART_RX.ByteCounter++;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 1)&&(UART_RX.ByteCounter <= 4))
-//                               {
-//                                    *Kp_tm |= ch << ((3-(UART_RX.ByteCounter-1))*8);
-//                                    if (UART_RX.ByteCounter == 4) 
-//                                      PID.Kp = Kp_tm_float;
-//                                    UART_RX.ByteCounter++;
-//    //                                if (isnan(Kp)!=0)//если NaN
-//    //                                    Kp = Kp_tm_float;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 5)&&(UART_RX.ByteCounter <= 8))
-//                               {
-//                                    *Ki_tm |= ch << ((3-(UART_RX.ByteCounter-5))*8);
-//                                    if (UART_RX.ByteCounter == 8) 
-//                                      //PID.Ki = Ki_tm_float;
-//                                    UART_RX.ByteCounter++;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 9)&&(UART_RX.ByteCounter <= 12))
-//                               {
-//                                    *Kd_tm |= ch << ((3-(UART_RX.ByteCounter-9))*8);
-//                                    if (UART_RX.ByteCounter == 12) 
-//                                      //PID.Kd = Kd_tm_float;
-//                                    UART_RX.ByteCounter++;
-//                               }
+
                           }
                           break;
 
@@ -196,5 +151,5 @@ else
       
       
       }
-
+return (0);
 }

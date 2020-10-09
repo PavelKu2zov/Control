@@ -4,7 +4,9 @@
 #include "Sbus.h"
 #include "math.h"
 
-void Parsing(uint32_t *size);
+
+extern int GetMesPC(uint8_t *buff);
+
 
 PRMTypedef PRM;
 PIDTypeDef PID;
@@ -31,7 +33,7 @@ void main()
 
 
  
-  sensor.id = 0xd1;
+ sensor.id = 0xd1;
  sensor.interface = BMI160_SPI_INTF;
  sensor.read = ReadDataSpi3;
  sensor.write = WriteDataSpi3;
@@ -68,52 +70,37 @@ void main()
   PID.alfa_old = PID.alfa_gyro_old;
  
  TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
-for(;;)
-{
-if (GetMesPC())
-{
-  TIM_ITConfig(TIM6, TIM_IT_Update, DISABLE);
-/                             if (UART_RX.ByteCounter == 0)
-//                               {
-//                                  if ( ch > 100)		
-//                                          PRM.GasValue = 100;  
-//                                  else
-//                                          PRM.GasValue = ch;
-//                                 
-//                                  UART_RX.ByteCounter++;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 1)&&(UART_RX.ByteCounter <= 4))
-//                               {
-//                                    *Kp_tm |= ch << ((3-(UART_RX.ByteCounter-1))*8);
-//                                    if (UART_RX.ByteCounter == 4) 
-//                                      PID.Kp = Kp_tm_float;
-//                                    UART_RX.ByteCounter++;
-//    //                                if (isnan(Kp)!=0)//если NaN
-//    //                                    Kp = Kp_tm_float;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 5)&&(UART_RX.ByteCounter <= 8))
-//                               {
-//                                    *Ki_tm |= ch << ((3-(UART_RX.ByteCounter-5))*8);
-//                                    if (UART_RX.ByteCounter == 8) 
-//                                      //PID.Ki = Ki_tm_float;
-//                                    UART_RX.ByteCounter++;
-//                               }
-//                             else if ((UART_RX.ByteCounter >= 9)&&(UART_RX.ByteCounter <= 12))
-//                               {
-//                                    *Kd_tm |= ch << ((3-(UART_RX.ByteCounter-9))*8);
-//                                    if (UART_RX.ByteCounter == 12) 
-//                                      //PID.Kd = Kd_tm_float;
-//                                    UART_RX.ByteCounter++;
-//                               }
-  
-  
-  TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
-}
+ uint8_t buff[64];
+ 
+ 
+  for(;;)
+    {
+      //разбираем принятые данные с ПК
+      if (GetMesPC(buff)>0)
+        {
+           float Kp_tm_float;
+           float Ki_tm_float;
+           float Kd_tm_float;
+           uint32_t *Kp_tm  = ((uint32_t*)&Kp_tm_float);
+           uint32_t *Ki_tm  = ((uint32_t*)&Ki_tm_float);
+           uint32_t *Kd_tm  = ((uint32_t*)&Kd_tm_float);
+          
+          TIM_ITConfig(TIM6, TIM_IT_Update, DISABLE);
+          if (buff[0] > 100)
+            PRM.GasValue = 100;
+          else
+            PRM.GasValue = buff[0] ;
+          
+          *Kp_tm = (buff[1]<<24)|(buff[2]<<16)|(buff[3]<<8)|buff[4];
+           PID.Kp = Kp_tm_float;
+          *Ki_tm = (buff[5]<<24)|(buff[6]<<16)|(buff[7]<<8)|buff[8];
+           PID.Ki = Ki_tm_float;
+          *Kd_tm = (buff[9]<<24)|(buff[10]<<16)|(buff[11]<<8)|buff[12];  
+          
+          TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+        }
 
-
-
-
-}
+    }
 
  
 }
