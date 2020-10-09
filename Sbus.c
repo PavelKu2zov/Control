@@ -5,24 +5,20 @@
 #define MARKER_END		(char)0x00
 
 
-/*	Создает  S-BUS frame.
-	data - входные данные
-        *buff - указатель на буффер для передачи по usart
-
+/* Создает  S-BUS frame.
+*  data - входные данные
+*  *buff - указатель на буффер для передачи по usart
 */
 
 void CreateSbusFrame(S_BUSTypeDef *data, char *buff)
 {
-  uint8_t AmountBits_Reg8=0;
-  uint8_t AmountBits_Reg11=11;
-  
-  
 	*buff =  MARKER_START;
    buff++;   
-	*buff = (data->analog_ch[0])&0xff;
+	*buff = 0xe8;//(data->analog_ch[0])&0xff;
    buff++;
-	*buff = ((data->analog_ch[0]>>8)|(data->analog_ch[1]<<3))&0xff;
-   buff++;                                                                      //далее поправить
+	*buff = 0x03;//((data->analog_ch[0]>>8)|(data->analog_ch[1]<<3))&0xff;
+        return;
+   buff++;                                                                      
 	*buff = ((data->analog_ch[1]>>5)|(data->analog_ch[2]<<6))&0xff;
    buff++;
 	*buff = (data->analog_ch[2]>>2)&0xff;
@@ -45,7 +41,7 @@ void CreateSbusFrame(S_BUSTypeDef *data, char *buff)
    *buff = (data->analog_ch[8])&0xff;
    buff++;
 	*buff = ((data->analog_ch[8]>>8)|(data->analog_ch[9]<<3))&0xff;
-   buff++
+   buff++;
 	*buff = ((data->analog_ch[9]>>5)|(data->analog_ch[10]<<6))&0xff;
    buff++;
 	*buff = (data->analog_ch[10]>>2)&0xff;
@@ -64,9 +60,7 @@ void CreateSbusFrame(S_BUSTypeDef *data, char *buff)
    buff++;
 	*buff = (data->analog_ch[15]>>3)&0xff;
    buff++;  
-   
-  *buff = 0x00;
-  buff++;
+
   *buff = data->dig_ch[0] ? (*buff | 0x80) : (*buff & (~0x80));
   *buff = data->dig_ch[1] ? (*buff | 0x40) : (*buff & (~0x40));
    buff++;

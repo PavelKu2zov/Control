@@ -1,11 +1,11 @@
 #include "stm32f4xx.h"
 
-#define  SIZE_BUFF_DMA_SPI1     16
-#define  SIZE_BUFF_DMA_SPI2     16
-#define  SIZE_BUFF_DMA_UART1_TX     32
+#define  SIZE_BUFF_DMA_SPI1     32
+#define  SIZE_BUFF_DMA_SPI2     32
+#define  SIZE_BUFF_DMA_UART1_TX     128
 #define  SIZE_BUFF_DMA_UART1_RX     128
 
-#define  SPI1_DR_8bit         *(__IO uint8_t*)&(SPI1->DR)
+#define  SPI3_DR_8bit         *(__IO uint8_t*)&(SPI3->DR)
 
 
 #define  delta_t                 (float)(0.02)
@@ -15,8 +15,8 @@
 
 typedef struct 
 {
-  char     	          *p_rd;                   // указатель на кольцевой буфер дл§ чтени§
-  char                *p_wr;       			   // указатель на кольцевой буфер дл§ записи
+  char     	      *p_rd;                   // указатель на кольцевой буфер дл§ чтени§
+  char                *p_wr;       	       // указатель на кольцевой буфер дл§ записи
   volatile uint32_t   *p_cndtr;                // указатель на инверсный счетчик принимаемых данных(используетс§ DMA)
   char                *StartAdr;               // указатель на стартовый адрес кольцевого буфера
   uint32_t            Size;                    // размер кольцевого буфера типа uint8_t
@@ -45,14 +45,22 @@ typedef struct	            // прием пакета по —ќћ порту
 
 typedef struct
 {
-	int8_t GasValue;
-	uint16_t Thrust;
+  int8_t GasValue;
+  uint16_t Thrust;
 }PRMTypedef;
   
-  
-  
-  
-int8_t ReadDataSpi1(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
-int8_t WriteDataSpi1(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
+
+
+typedef struct
+{
+ float alfa,alfa_acc,alfa_g,alfa_old,alfa_gyro,alfa_gyro_old;
+ float Kp,Ki,Kd;
+ float I,P,D;//PID регул€тор
+ float e,e_old,u;// ошибка,управл€ющий сигнал
+}PIDTypeDef;
+
+int8_t ReadDataSpi3(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
+int8_t WriteDataSpi3(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
+void TimerBmi160(uint32_t delay);
 void  TransmitPRM_BLDC(uint16_t g);
 void  Init(void);

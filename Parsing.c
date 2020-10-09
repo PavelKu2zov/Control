@@ -4,6 +4,7 @@
 extern uint8_t  BuffRxUsart1[SIZE_BUFF_DMA_UART1_RX];
 extern Circular_buffTypeDef Buff_USART1_RX;
 extern PRMTypedef PRM;
+extern PIDTypeDef PID;
 extern float Kp,Ki,Kd;
 
  void Parsing(uint32_t *size)
@@ -68,7 +69,7 @@ extern float Kp,Ki,Kd;
                            {
                                 *Kp_tm |= ch << ((3-(UART_RX.ByteCounter-1))*8);
                                 if (UART_RX.ByteCounter == 4) 
-                                  Kp = Kp_tm_float;
+                                  PID.Kp = Kp_tm_float;
                                 UART_RX.ByteCounter++;
 //                                if (isnan(Kp)!=0)//если NaN
 //                                    Kp = Kp_tm_float;
@@ -77,14 +78,14 @@ extern float Kp,Ki,Kd;
                            {
                                 *Ki_tm |= ch << ((3-(UART_RX.ByteCounter-5))*8);
                                 if (UART_RX.ByteCounter == 8) 
-                                  Ki = Ki_tm_float;
+                                  PID.Ki = Ki_tm_float;
                                 UART_RX.ByteCounter++;
                            }
                          else if ((UART_RX.ByteCounter >= 9)&&(UART_RX.ByteCounter <= 12))
                            {
                                 *Kd_tm |= ch << ((3-(UART_RX.ByteCounter-9))*8);
                                 if (UART_RX.ByteCounter == 12) 
-                                  Kd = Kd_tm_float;
+                                  PID.Kd = Kd_tm_float;
                                 UART_RX.ByteCounter++;
                            }
                       }

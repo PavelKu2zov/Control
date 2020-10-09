@@ -1,4 +1,4 @@
-#include "stm32f10x.h"
+#include "stm32f4xx.h"
 typedef struct 
 {
 	uint16_t analog_ch[16];
