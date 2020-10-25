@@ -2,8 +2,9 @@
 #include "bmi160.h"
 #include "Init.h"
 #include "Sbus.h"
+#include "mpu6000.h"
 #include "math.h"
-
+//#include "SpiMPU6000Driver.h"
 
 extern int GetMesPC(uint8_t *buff);
 
@@ -16,11 +17,11 @@ struct bmi160_sensor_data accel;
 struct bmi160_sensor_data gyro;
 
 int8_t rslt;
-
+uint8_t tempp[10];
 void main()
 {
  Init();
-
+GPIO_SetBits(GPIOA, GPIO_Pin_4);//CS MPU6000
   PID.alfa = PID.alfa_acc = PID.alfa_g = PID.alfa_gyro = PID.alfa_gyro_old = PID.alfa_old =0;
   PID.Kp = 11.5;
   PID.Ki = 0.1;
@@ -29,8 +30,30 @@ void main()
   PID.I = 0;
   PID.D = 0;
   PID.e_old = 0;
-
-
+ 
+  //настраиваем Sample Rate 8 kHz/(1+smplrt)smplrt = 79
+ReadDataSPI1(MPUREG_WHOAMI, tempp, 1);
+ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
+  tempp[0] = 79;
+  //WriteDataSPI1(MPUREG_SMPLRT_DIV, tempp, 1);
+ ReadDataSPI1(MPUREG_WHOAMI, tempp, 1); 
+  //настраиваем config
+  tempp[0] = 0;
+  WriteDataSPI1(MPUREG_CONFIG, tempp, 1);
+  
+  //настраиваем gyro
+  tempp[0] = 0x18;//FS = 3 -> 2000 deg/s
+  WriteDataSPI1(MPUREG_GYRO_CONFIG, tempp, 1);
+  
+ //настраиваем accel
+  tempp[0] = 0x0;//AFS = 0 -> 2 g
+  WriteDataSPI1(MPUREG_ACCEL_CONFIG, tempp, 1);
+  
+  ReadDataSPI1(MPUREG_WHOAMI, tempp, 1);
+  ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
+  while(1);
+    
+  
 
  
  sensor.id = 0xd1;

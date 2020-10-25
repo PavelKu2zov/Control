@@ -6,7 +6,7 @@
 #define  SIZE_BUFF_DMA_UART1_RX     128
 
 #define  SPI3_DR_8bit         *(__IO uint8_t*)&(SPI3->DR)
-
+#define  SPI1_DR_8bit         *(__IO uint8_t*)&(SPI1->DR)
 
 #define  delta_t                 (float)(0.02)
 #define  PI                      (float)3.1415926535
