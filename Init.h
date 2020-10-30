@@ -57,6 +57,12 @@ typedef struct
  float Kp,Ki,Kd;
  float I,P,D;//PID регулятор
  float e,e_old,u;// ошибка,управляющий сигнал
+ float angleAccel_x;//угол по акселерометру
+ float angleAccel_y;
+ float angleAccel_z;
+ float angleGyro_x;//угол по гироскопу
+ float angleGyro_y;
+ float angleGyro_z;
 }PIDTypeDef;
 
 int8_t ReadDataSpi3(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
@@ -64,3 +70,4 @@ int8_t WriteDataSpi3(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t
 void TimerBmi160(uint32_t delay);
 void  TransmitPRM_BLDC(uint16_t g);
 void  Init(void);
+void  SPI_SetBaudRatePrescaler(SPI_TypeDef* SPIx, uint16_t BaudRatePrescaler);

@@ -78,11 +78,13 @@ typedef struct
   int16_t x;
   int16_t y;
   int16_t z;
-}TypeDefACCEL;
+}TypeDefACCEL_MPU6000;
 
 typedef struct
 {
   int16_t x;
   int16_t y;
   int16_t z;
-}TypeDefGYRO;
+}TypeDefGYRO_MPU6000;
+
+void mpu6000_get_sensor_data(TypeDefACCEL_MPU6000 *accel, TypeDefGYRO_MPU6000 *gyro );

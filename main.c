@@ -4,7 +4,8 @@
 #include "Sbus.h"
 #include "mpu6000.h"
 #include "math.h"
-//#include "SpiMPU6000Driver.h"
+#include "SpiMPU6000Driver.h"
+#include "stdio.h"
 
 extern int GetMesPC(uint8_t *buff);
 
@@ -15,6 +16,9 @@ PIDTypeDef PID;
 struct bmi160_dev sensor; 
 struct bmi160_sensor_data accel;
 struct bmi160_sensor_data gyro;
+
+TypeDefACCEL_MPU6000    accel_MPU6000;
+TypeDefGYRO_MPU6000     gyro_MPU6000;
 
 int8_t rslt;
 uint8_t tempp[10];
@@ -30,32 +34,42 @@ GPIO_SetBits(GPIOA, GPIO_Pin_4);//CS MPU6000
   PID.I = 0;
   PID.D = 0;
   PID.e_old = 0;
- 
-  //настраиваем Sample Rate 8 kHz/(1+smplrt)smplrt = 79
-ReadDataSPI1(MPUREG_WHOAMI, tempp, 1);
-ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
-  tempp[0] = 79;
-  //WriteDataSPI1(MPUREG_SMPLRT_DIV, tempp, 1);
- ReadDataSPI1(MPUREG_WHOAMI, tempp, 1); 
-  //настраиваем config
-  tempp[0] = 0;
-  WriteDataSPI1(MPUREG_CONFIG, tempp, 1);
   
-  //настраиваем gyro
-  tempp[0] = 0x18;//FS = 3 -> 2000 deg/s
-  WriteDataSPI1(MPUREG_GYRO_CONFIG, tempp, 1);
+ ReadDataSPI1(MPUREG_WHOAMI, tempp, 1); 
+ //отключаем sleep режим
+ WriteDataSPI1(MPUREG_PWR_MGMT_1, 0);
+  TimerBmi160(100);
+ //отключаем шину i2c
+ WriteDataSPI1(MPUREG_USER_CTRL, BIT_I2C_IF_DIS);  
+   TimerBmi160(100);
+ //настраиваем Sample Rate 8 kHz/(1+smplrt) smplrt = 79
+ WriteDataSPI1(MPUREG_SMPLRT_DIV, 79);
+   TimerBmi160(100);
+ //настраиваем config
+ WriteDataSPI1(MPUREG_CONFIG, 0);
+    TimerBmi160(100);
+ //настраиваем gyro
+ ReadDataSPI1(MPUREG_GYRO_CONFIG, tempp, 1);
+ WriteDataSPI1(MPUREG_GYRO_CONFIG, 0x18);//FS = 3 -> 2000 deg/s
+   TimerBmi160(100);
+ ReadDataSPI1(MPUREG_GYRO_CONFIG, tempp, 1);
   
  //настраиваем accel
-  tempp[0] = 0x0;//AFS = 0 -> 2 g
-  WriteDataSPI1(MPUREG_ACCEL_CONFIG, tempp, 1);
+ ReadDataSPI1(MPUREG_ACCEL_CONFIG, tempp, 1);
+ WriteDataSPI1(MPUREG_ACCEL_CONFIG, 0);//AFS = 0 -> 2 g
+   TimerBmi160(100);
+ ReadDataSPI1(MPUREG_ACCEL_CONFIG, tempp, 1);
   
-  ReadDataSPI1(MPUREG_WHOAMI, tempp, 1);
-  ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
-  while(1);
-    
-  
+ //повышение частоты CLK SPI1 
+ SPI_SetBaudRatePrescaler(SPI1, SPI_BaudRatePrescaler_8);
 
- 
+//  while(1)
+//  {
+//    mpu6000_get_sensor_data(&accel_MPU6000, &gyro_MPU6000 );
+//    TimerBmi160(500);
+//  }
+//    
+  
  sensor.id = 0xd1;
  sensor.interface = BMI160_SPI_INTF;
  sensor.read = ReadDataSpi3;
@@ -87,8 +101,10 @@ ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
   /* Set the sensor configuration */
   rslt = bmi160_set_sens_conf(&sensor);
   
-  rslt = bmi160_get_sensor_data(BMI160_ACCEL_SEL, &accel, NULL, &sensor);
-  PID.alfa_acc = PI/2 - acos((float)accel.x/-17039);
+  //rslt = bmi160_get_sensor_data(BMI160_ACCEL_SEL, &accel, NULL, &sensor);
+  mpu6000_get_sensor_data(&accel_MPU6000, &gyro_MPU6000 );
+  //PID.alfa_acc = PI/2 - acos((float)accel.x/-17039);
+  PID.alfa_acc = PI/2 - acos((float)accel_MPU6000.x/-17039);
   PID.alfa_gyro_old = PID.alfa_acc*180/PI;
   PID.alfa_old = PID.alfa_gyro_old;
  
@@ -99,7 +115,7 @@ ReadDataSPI1(MPUREG_SMPLRT_DIV, tempp, 4);
   for(;;)
     {
       //разбираем прин€тые данные с ѕ 
-      if (GetMesPC(buff)>0)
+      if (0)//(GetMesPC(buff)>0)
         {
            float Kp_tm_float;
            float Ki_tm_float;

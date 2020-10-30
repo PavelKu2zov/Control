@@ -12,6 +12,8 @@ void Init()
   //clock PCLK1 - 42 MHz max
   //clock PCLK2 - 85 MHz max
   
+  //RCC_PCLK2Config(RCC_HCLK_Div2);
+  
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
@@ -170,9 +172,9 @@ void Init()
   /*--------------------Настройка TIMER6 для опроса BMI160-------------------*/
   TIM_DeInit(TIM6);
   TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;//clock 42 MHz
-  TIM_TimeBaseInitStruct.TIM_Prescaler=84;
+  TIM_TimeBaseInitStruct.TIM_Prescaler=42000;//84;
   TIM_TimeBaseInitStruct.TIM_CounterMode=TIM_CounterMode_Up;
-  TIM_TimeBaseInitStruct.TIM_Period = 10000;// 50 Hz 
+  TIM_TimeBaseInitStruct.TIM_Period = 1000;//10000;// 50 Hz 
   TIM_TimeBaseInitStruct.TIM_ClockDivision=TIM_CKD_DIV1;
   TIM_TimeBaseInitStruct.TIM_RepetitionCounter=0;  
   TIM_TimeBaseInit(TIM6, &TIM_TimeBaseInitStruct);
@@ -277,4 +279,18 @@ void Init()
    USART_Cmd(USART6, ENABLE);
    TIM_Cmd(TIM6, ENABLE);
    TIM_Cmd(TIM7, ENABLE);
+}
+
+void SPI_SetBaudRatePrescaler(SPI_TypeDef* SPIx, uint16_t BaudRatePrescaler)
+{
+  /* check the parameters */
+  assert_param(IS_SPI_ALL_PERIPH(SPIx));
+  
+  while(SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_BSY) == SET);
+  
+  SPI_Cmd(SPIx, DISABLE);
+  uint16_t CR1_tm = SPIx->CR1;
+  SPIx->CR1 = (CR1_tm & (~SPI_CR1_BR));
+  SPIx->CR1 |= BaudRatePrescaler;
+  SPI_Cmd(SPIx, ENABLE);
 }
