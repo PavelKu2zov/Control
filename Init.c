@@ -172,9 +172,9 @@ void Init()
   /*--------------------Настройка TIMER6 для опроса BMI160-------------------*/
   TIM_DeInit(TIM6);
   TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;//clock 42 MHz
-  TIM_TimeBaseInitStruct.TIM_Prescaler=42000;//84;
+  TIM_TimeBaseInitStruct.TIM_Prescaler = 84;
   TIM_TimeBaseInitStruct.TIM_CounterMode=TIM_CounterMode_Up;
-  TIM_TimeBaseInitStruct.TIM_Period = 1000;//10000;// 50 Hz 
+  TIM_TimeBaseInitStruct.TIM_Period = 10000;// 50 Hz 
   TIM_TimeBaseInitStruct.TIM_ClockDivision=TIM_CKD_DIV1;
   TIM_TimeBaseInitStruct.TIM_RepetitionCounter=0;  
   TIM_TimeBaseInit(TIM6, &TIM_TimeBaseInitStruct);
@@ -192,6 +192,7 @@ void Init()
   
   /*----------------------------Настройка DMA2 для USART1_RX------------------*/
    DMA_InitTypeDef DMA_InitStruct;
+   DMA_StructInit(&DMA_InitStruct);
    DMA_InitStruct.DMA_Channel = DMA_Channel_4;
    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR;
    DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t)BuffRxUsart1;
@@ -207,6 +208,7 @@ void Init()
   
    /*----------------------------Настройка DMA2 для USART1_TX------------------*/ 
    DMA_InitStruct.DMA_Channel = DMA_Channel_4;
+   DMA_StructInit(&DMA_InitStruct);
    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR;
    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
    DMA_InitStruct.DMA_BufferSize = SIZE_BUFF_DMA_UART1_TX;
@@ -219,6 +221,7 @@ void Init()
    DMA_Init(DMA2_Stream7,&DMA_InitStruct);
    
    /*----------------------------Настройка DMA2 для USART6_TX------------------*/ 
+   DMA_StructInit(&DMA_InitStruct);
    DMA_InitStruct.DMA_Channel = DMA_Channel_5;
    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&USART6->DR;
    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
@@ -226,6 +229,7 @@ void Init()
    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+   DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
    DMA_InitStruct.DMA_Mode = DMA_Mode_Normal;
    DMA_InitStruct.DMA_Priority = DMA_Priority_High;
    DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable;
@@ -260,6 +264,7 @@ void Init()
    DMA_InitStruct.DMA_Priority = DMA_Priority_High;
    DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable;
    DMA_Init(DMA2_Stream0,&DMA_InitStruct);
+   
    /*----------------------------Настройка NVIC------------------*/
    NVIC_InitTypeDef NVIC_InitStruct;
    NVIC_InitStruct.NVIC_IRQChannel = TIM6_DAC_IRQn;

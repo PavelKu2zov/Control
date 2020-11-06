@@ -42,7 +42,7 @@ PID.alfa = (1-K)*(PID.alfa_old + ((float)(gyro_MPU6000.y)/16.9) * delta_t) + K*P
 PID.alfa_old = PID.alfa;    
  //управление оборотами двигателя
  // if ((PRM.GasValue >= 0) && (PRM.GasValue < 20))
-     if (0)//(PRM.GasValue >= 0) 
+     if (PRM.GasValue >= 0) 
    // if (PRM.GasValue >= 0)
 	//TIM2->CCR2 = 4500 + (15*PRM.GasValue);//(1500*PRM.GasValue/100)	
         TransmitPRM_BLDC(PRM.GasValue*2047/100);
@@ -96,7 +96,7 @@ SendMesPC();
 
 TIM_ClearFlag(TIM6, TIM_FLAG_Update);
 
-printf("angel_x = %10.3f\r\n",PID.angleAccel_x);
+//printf("angel_x = %10.3f\r\n",PID.angleAccel_x);
 
  GPIO_ResetBits(GPIOB, GPIO_Pin_1);
 }

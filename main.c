@@ -140,7 +140,6 @@ GPIO_SetBits(GPIOA, GPIO_Pin_4);//CS MPU6000
         }
 
     }
-
  
 }
 
@@ -160,8 +159,8 @@ void TimerBmi160(uint32_t delay)
  /*---------------------------Передача данных в BLDC по SBUS--------------------*/
  void TransmitPRM_BLDC(uint16_t g)
  {
-   S_BUSTypeDef data;
-   char buff[25];
+   S_BUSTypeDef data = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0}};
+   static char buff[25];
    GPIO_SetBits(GPIOB, GPIO_Pin_0);
    memset(buff,0,25);
    data.analog_ch[0] = g;//уровень ручки акселератора, значения  от 0 до 2047
@@ -170,29 +169,15 @@ void TimerBmi160(uint32_t delay)
    
    CreateSbusFrame( &data, buff);
    
-   if (DMA_GetCmdStatus(DMA2_Stream6) == ENABLE)//if  ((DMA2_Stream6->CR & DMA_SxCR_EN) == DMA_SxCR_EN)//(DMA_GetFlagStatus(DMA1_FLAG_TC7) == SET)
+   if (DMA_GetCmdStatus(DMA2_Stream6) == DISABLE)
    {       
-     if (DMA_GetFlagStatus(DMA2_Stream6, DMA_FLAG_TCIF6) == SET)//if ((DMA2->HISR & DMA_FLAG_TCIF6) == DMA_FLAG_TCIF6)
-     {
-       /* Disable the selected DMAy Streamx by clearing EN bit */
-       DMA_Cmd(DMA2_Stream6, DISABLE);//DMA2_Stream6->CR &= ~(uint32_t)DMA_SxCR_EN;//DMA_Cmd(DMA1_Channel7, DISABLE);
-       /*Clears the DMAy Streamx's pending flags.*/
-       DMA_ClearFlag(DMA2_Stream6, DMA_FLAG_TCIF6);//DMA2->HIFCR = (uint32_t)(DMA_FLAG_TCIF6);//DMA1->IFCR = DMA1_FLAG_TC7;
-       DMA_SetCurrDataCounter(DMA2_Stream6, 25);//DMA2_Stream6->NDTR = 25;//DMA1_Channel7->CNDTR = 25;
-       DMA2_Stream6->M0AR = (uint32_t)&buff;//DMA1_Channel7->CMAR = (uint32_t)&buff;
-       DMA_Cmd(DMA2_Stream6, ENABLE);//DMA2_Stream6->CR |= (uint32_t)DMA_SxCR_EN;//DMA_Cmd(DMA1_Channel7, ENABLE);
-     }
+     /*Clears the DMAy Streamx's pending flags.*/
+     DMA_ClearFlag(DMA2_Stream6, DMA_FLAG_TCIF6 | DMA_FLAG_HTIF6 | DMA_FLAG_TEIF6|DMA_FLAG_DMEIF6 | DMA_FLAG_FEIF6);
+     DMA_SetCurrDataCounter(DMA2_Stream6, 25);
+     DMA2_Stream6->M0AR = (uint32_t)&buff;
+     DMA_Cmd(DMA2_Stream6, ENABLE);
    }
-   else
-   {
-    /* Disable the selected DMAy Streamx by clearing EN bit */
-       DMA_Cmd(DMA2_Stream6, DISABLE);//DMA2_Stream6->CR &= ~(uint32_t)DMA_SxCR_EN;//DMA_Cmd(DMA1_Channel7, DISABLE);
-       /*Clears the DMAy Streamx's pending flags.*/
-       DMA_ClearFlag(DMA2_Stream6, DMA_FLAG_TCIF6);//DMA2->HIFCR = (uint32_t)(DMA_FLAG_TCIF6);//DMA1->IFCR = DMA1_FLAG_TC7;
-       DMA_SetCurrDataCounter(DMA2_Stream6, 25);//DMA2_Stream6->NDTR = 25;//DMA1_Channel7->CNDTR = 25;
-       DMA2_Stream6->M0AR = (uint32_t)&buff;//DMA1_Channel7->CMAR = (uint32_t)&buff;
-       DMA_Cmd(DMA2_Stream6, ENABLE);//DMA2_Stream6->CR |= (uint32_t)DMA_SxCR_EN;//DMA_Cmd(DMA1_Channel7, ENABLE);
-   }
+
     GPIO_ResetBits(GPIOB, GPIO_Pin_0);
    
  }
